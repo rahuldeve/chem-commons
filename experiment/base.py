@@ -35,7 +35,7 @@ class Results:
     optimized_pipeline: Pipeline
 
     def to_dict(self) -> dict[str, Any]:
-        return self.test_scores | {"optimized_pipeline": self.optimized_pipeline}
+        return self.test_scores
 
 
 @dataclass
@@ -88,6 +88,7 @@ class Experiment:
             str(self.feature_pipeline),
             str(self.objective_strategy),
             str(self.sampler),
+            str(self.threshold_strategy)
         ]
 
         return " / ".join(components)
@@ -96,7 +97,9 @@ class Experiment:
         results_dict = self.results.to_dict() if self.results else {}
         others = {
             "feature_pipeline": str(self.feature_pipeline),
+            "dataset": str(self.data),
             "objective_strategy": str(self.objective_strategy),
+            "threshold_strategy": str(self.threshold_strategy),
             "sampler_name": self.sampler,
         }
         return results_dict | others

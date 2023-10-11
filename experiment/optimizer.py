@@ -1,9 +1,12 @@
+import warnings
+from copy import deepcopy
 from functools import partial
 import ray
 import numpy as np
 import optuna
+from chem_commons.utils import set_seeds
 from sklearn import metrics
-from sklearn.model_selection import train_test_split
+from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.pipeline import Pipeline, make_pipeline
 
 from .base import (
@@ -46,7 +49,9 @@ def calc_scores(y_pred_prob, y_pred, y_true, split_name):
     metrics_dict["precision"] = metrics.precision_score(y_true, y_pred)
     metrics_dict["recall"] = metrics.recall_score(y_true, y_pred)
     metrics_dict["roc_auc"] = metrics.roc_auc_score(y_true, y_pred_prob)
-    metrics_dict["avg_precision"] = metrics.average_precision_score(y_true, y_pred_prob)
+    metrics_dict["average_precision"] = metrics.average_precision_score(
+        y_true, y_pred_prob
+    )
 
     auc, (lb, ub) = delong_confidence_intervals(y_true, y_pred_prob)
     metrics_dict["test_delong_auc"] = auc
@@ -68,6 +73,9 @@ def objective(
     threshold_strategy,
     sample_weights=None,
 ):
+    warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
+    set_seeds(42)
+
     params = sample_param_space(trial, pipeline_param_space)
     pipeline = pipeline.set_params(
         **params,
@@ -89,6 +97,7 @@ def objective(
 # @ray.remote(num_cpus=16)
 def optimize_pipeline(experiment: Experiment):
     optuna.logging.set_verbosity(optuna.logging.WARNING)
+    set_seeds(42)
 
     feature_pipeline = experiment.feature_pipeline.pipeline
     feature_pipeline_param_space = experiment.feature_pipeline.param_space

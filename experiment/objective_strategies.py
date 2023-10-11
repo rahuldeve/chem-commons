@@ -88,5 +88,6 @@ class MultiObjectiveSingleBest(ObjectiveStrategy):
 
     def __str__(self) -> str:
         class_name = self.__class__.__name__
-        metrics_str = str(list(zip(self.metrics, self.directions)))
+        directions = [d.name for d in self.directions]
+        metrics_str = str(list(zip(self.metrics, directions)))
         return f"{class_name}({metrics_str}, {self.selection_metric})"
