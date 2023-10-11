@@ -1,10 +1,12 @@
 import warnings
 from copy import deepcopy
 from functools import partial
-import ray
+
+
 import numpy as np
 import optuna
 from chem_commons.utils import set_seeds
+import ray
 from sklearn import metrics
 from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.pipeline import Pipeline, make_pipeline
@@ -18,6 +20,7 @@ from .base import (
     ParamSpace,
 )
 from .confidence import delong_confidence_intervals
+from .utils import RayExperimentTracker
 
 
 def sample_param_space(trial, param_space: ParamSpace):
@@ -74,6 +77,7 @@ def objective(
     sample_weights=None,
 ):
     warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
+    warnings.filterwarnings("ignore", category=UserWarning)
     set_seeds(42)
 
     params = sample_param_space(trial, pipeline_param_space)
@@ -94,9 +98,11 @@ def objective(
     return [scores[f"val_{metric}"] for metric in objective_metrics]
 
 
-# @ray.remote(num_cpus=16)
-def optimize_pipeline(experiment: Experiment):
+@ray.remote(num_cpus=16)
+def optimize_pipeline(experiment: Experiment, tracker: RayExperimentTracker):  # type: ignore
     optuna.logging.set_verbosity(optuna.logging.WARNING)
+    warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
+    warnings.filterwarnings("ignore", category=UserWarning)
     set_seeds(42)
 
     feature_pipeline = experiment.feature_pipeline.pipeline
@@ -138,7 +144,10 @@ def optimize_pipeline(experiment: Experiment):
     )
 
     study.optimize(
-        objective_func, n_trials=experiment.n_trials, show_progress_bar=False
+        objective_func,
+        n_trials=experiment.n_trials,
+        show_progress_bar=False,
+        callbacks=[lambda study, trial: tracker.update.remote()],
     )
 
     best_trial = experiment.objective_strategy(study)
