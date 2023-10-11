@@ -41,8 +41,10 @@ class Results:
 @dataclass
 class DataBunch:
     name: Optional[str]
-    X_train_val: pd.DataFrame
-    y_train_val: pd.DataFrame | pd.Series
+    X_train: pd.DataFrame
+    y_train: pd.DataFrame | pd.Series
+    X_val: pd.DataFrame
+    y_val: pd.DataFrame | pd.Series
     X_test: pd.DataFrame
     y_test: pd.DataFrame | pd.Series
 

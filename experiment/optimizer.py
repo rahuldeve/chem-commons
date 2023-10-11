@@ -60,8 +60,10 @@ def objective(
     trial,
     pipeline,
     pipeline_param_space,
-    X_train_val,
-    y_train_val,
+    X_train,
+    y_train,
+    X_val,
+    y_val,
     objective_metrics,
     threshold_strategy,
     sample_weights=None,
@@ -72,10 +74,7 @@ def objective(
         # **{k:v for k,v in trial.user_attrs.items() if k!='cross_val_scores'}
     )
 
-    X_train, X_val, y_train, y_val = train_test_split(
-        X_train_val, y_train_val, test_size=0.2
-    )
-    pipeline.fit(X_train, y_train)
+    pipeline = pipeline.fit(X_train, y_train)
     y_train_pred_prob = pipeline.predict_proba(X_train)[:, 1]
     thresholding_func = threshold_strategy.function()
     optimal_threshold = thresholding_func(y_train, y_train_pred_prob)
@@ -104,8 +103,10 @@ def optimize_pipeline(experiment: Experiment):
         **experiment.terminal_model.get_param_space(),
     }
 
-    X_train_val = experiment.data.X_train_val
-    y_train_val = experiment.data.y_train_val
+    X_train = experiment.data.X_train
+    y_train = experiment.data.y_train
+    X_val = experiment.data.X_val
+    y_val = experiment.data.y_val
     X_test = experiment.data.X_test
     y_test = experiment.data.y_test
 
@@ -116,12 +117,14 @@ def optimize_pipeline(experiment: Experiment):
 
     objective_func = partial(
         objective,
-        pipeline=pipeline,
-        pipeline_param_space=pipeline_param_space,
-        X_train_val=X_train_val,
-        y_train_val=y_train_val,
-        objective_metrics=experiment.objective_strategy.get_metrics(),
-        threshold_strategy=experiment.threshold_strategy
+        pipeline=deepcopy(pipeline),
+        pipeline_param_space=deepcopy(pipeline_param_space),
+        X_train=deepcopy(X_train),
+        y_train=deepcopy(y_train),
+        X_val=deepcopy(X_val),
+        y_val=deepcopy(y_val),
+        objective_metrics=deepcopy(experiment.objective_strategy.get_metrics()),
+        threshold_strategy=deepcopy(experiment.threshold_strategy)
         # sample_weights = experiment.sample_weights
     )
 
@@ -137,11 +140,6 @@ def optimize_pipeline(experiment: Experiment):
         transform="pandas"
     )  # type: ignore
 
-    # if experiment.sample_weights is not None:
-    #     pipeline.fit(X_train_val, y_train_val, **{'xgbclassifier__sample_weight': experiment.sample_weights})
-    # else:
-
-    X_train, _, y_train, _ = train_test_split(X_train_val, y_train_val, test_size=0.2)
     pipeline.fit(X_train, y_train)
     y_train_pred_prob = pipeline.predict_proba(X_train)[:, 1]  # type: ignore
     thresholding_func = experiment.threshold_strategy.function()
