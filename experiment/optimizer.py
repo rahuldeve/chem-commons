@@ -166,4 +166,4 @@ def optimize_pipeline(experiment: Experiment, tracker: RayExperimentTracker):  #
     y_test_pred = np.where(y_test_pred_prob >= optimal_threshold, 1.0, 0.0)
     test_scores = calc_scores(y_test_pred_prob, y_test_pred, y_test.to_numpy(), "test")
     test_scores = {k: np.round(v, 3) for k, v in test_scores.items()}
-    return test_scores, pipeline, study
+    return test_scores, pipeline, optimal_threshold

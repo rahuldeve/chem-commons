@@ -33,9 +33,13 @@ class SupportedModels(Enum):
 class Results:
     test_scores: dict[str, float]
     optimized_pipeline: Pipeline
+    optimal_threshold: int
 
     def to_dict(self) -> dict[str, Any]:
-        return self.test_scores
+        return self.test_scores | {
+            "optimized_pipeline": self.optimized_pipeline,
+            "threshold": self.optimal_threshold,
+        }
 
 
 @dataclass
@@ -88,7 +92,7 @@ class Experiment:
             str(self.feature_pipeline),
             str(self.objective_strategy),
             str(self.sampler),
-            str(self.threshold_strategy)
+            str(self.threshold_strategy),
         ]
 
         return " / ".join(components)
