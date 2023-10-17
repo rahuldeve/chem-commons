@@ -5,7 +5,6 @@ from functools import partial
 
 import numpy as np
 import optuna
-from chem_commons.utils import set_seeds
 import ray
 from sklearn import metrics
 from sklearn.exceptions import UndefinedMetricWarning
@@ -20,7 +19,7 @@ from .base import (
     ParamSpace,
 )
 from .confidence import delong_confidence_intervals
-from .utils import RayExperimentTracker
+from .utils import RayExperimentTracker, set_seeds
 
 
 def sample_param_space(trial, param_space: ParamSpace):

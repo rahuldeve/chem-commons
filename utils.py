@@ -12,12 +12,6 @@ from joblib import Parallel, delayed
 from functools import wraps
 
 
-def set_seeds(seed):
-    random.seed(seed)
-    np.random.seed(seed)
-    # torch.manual_seed(seed)
-
-
 def standardize(smiles):
     with BlockLogs():
         # follows the steps in
