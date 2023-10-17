@@ -70,9 +70,9 @@ def optimize_all(experiments: list[Experiment]):
         for job in completed:
             idx = jobs.index(job)
             pbars[idx].close()
-            test_scores, pipeline, _ = ray.get(job)
+            test_scores, pipeline, optimal_thershold = ray.get(job)
             experiment = experiments[idx]
-            experiment.results = Results(test_scores, pipeline)
+            experiment.results = Results(test_scores, pipeline, optimal_thershold)
             out.append(experiment)
 
     # out = []
