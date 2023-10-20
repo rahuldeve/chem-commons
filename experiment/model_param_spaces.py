@@ -43,6 +43,7 @@ lgbm_classifier_param_space: ParamSpace = {
     "lgbmclassifier__min_child_samples": IntParam(5, 100),
     "lgbmclassifier__n_jobs": ConstantParam(4),
     "lgbmclassifier__random_state": ConstantParam(42),
+    "lgbmclassifier__scale_pos_weight": IntParam(10, 50, 1)
 }
 
 xgboost_param_space: ParamSpace = {
@@ -53,6 +54,7 @@ xgboost_param_space: ParamSpace = {
     "xgbclassifier__subsample": FloatParam(0.1, 1),
     "xgbclassifier__n_jobs": ConstantParam(4),
     "xgbclassifier__random_state": ConstantParam(42),
+    "xgbclassifier__scale_pos_weight": IntParam(10, 50, 1)
 }
 
 catboost_param_space: ParamSpace = {
