@@ -43,18 +43,23 @@ lgbm_classifier_param_space: ParamSpace = {
     "lgbmclassifier__min_child_samples": IntParam(5, 100),
     "lgbmclassifier__n_jobs": ConstantParam(4),
     "lgbmclassifier__random_state": ConstantParam(42),
-    "lgbmclassifier__scale_pos_weight": IntParam(10, 50, 1)
+    "lgbmclassifier__scale_pos_weight": IntParam(10, 50, 1),
+    "lgbmclassifier__n_estimators": ConstantParam(2000),
+    # "lgbmclassifier__early_stopping_rounds": ConstantParam(100)
 }
 
 xgboost_param_space: ParamSpace = {
-    "xgbclassifier__n_estimators": IntParam(100, 500),
+    "xgbclassifier__n_estimators": ConstantParam(2000),
+    # "xgbclassifier__early_stopping_rounds": ConstantParam(100),
     "xgbclassifier__max_depth": IntParam(5, 10),
     "xgbclassifier__min_child_weight": FloatParam(0.1, 1),
     "xgbclassifier__learning_rate": FloatParam(0.001, 0.01),
     "xgbclassifier__subsample": FloatParam(0.1, 1),
     "xgbclassifier__n_jobs": ConstantParam(4),
     "xgbclassifier__random_state": ConstantParam(42),
-    "xgbclassifier__scale_pos_weight": IntParam(10, 50, 1)
+    "xgbclassifier__scale_pos_weight": IntParam(10, 50, 1),
+    "xgbclassifier__verbosity": ConstantParam(0),
+    # "xgbclassifier__eval_metric": ChoiceParam(['aucpr', 'auc'])
 }
 
 catboost_param_space: ParamSpace = {
@@ -66,6 +71,6 @@ catboost_param_space: ParamSpace = {
     "catboostclassifier__l2_leaf_reg": FloatParam(0.001, 0.1),
     "catboostclassifier__border_count": IntParam(32, 255),
     "catboostclassifier__bagging_temperature": FloatParam(0, 1),
-    "catboostclassifier__random_strength": IntParam(0, 1),
+    # "catboostclassifier__random_strength": IntParam(0, 1),
     "catboostclassifier__random_state": ConstantParam(42),
 }

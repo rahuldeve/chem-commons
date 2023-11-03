@@ -2,7 +2,6 @@ import warnings
 from copy import deepcopy
 from functools import partial
 
-
 import numpy as np
 import optuna
 import ray
@@ -20,6 +19,7 @@ from .base import (
 )
 from .confidence import delong_confidence_intervals
 from .utils import RayExperimentTracker, set_seeds
+from .fit_params import fit_param_mapping
 
 
 def sample_param_space(trial, param_space: ParamSpace):
@@ -85,7 +85,26 @@ def objective(
         # **{k:v for k,v in trial.user_attrs.items() if k!='cross_val_scores'}
     )
 
-    pipeline = pipeline.fit(X_train, y_train)
+    # We need to pass X_val to eval_set but it does not get passed through all the pipeline steps
+    # So we first extract the feature pipeline and transform X_val
+    # Since we are fitting the feature pipeline part two times, there may be a mismatch between the steps
+    # If columns are different, then an error should be thrown. Not sure about values within columns
+    feature_pipeline = deepcopy(pipeline.steps[0][1])
+    feature_pipeline = feature_pipeline.fit(X_train, y_train)
+    transformed_X_val = feature_pipeline.transform(X_val)
+
+    fit_params = fit_param_mapping[pipeline.steps[-1][1].__class__](transformed_X_val, y_val)
+    fit_params = {f'{pipeline.steps[-1][0]}__{k}': v for k,v in fit_params.items()}
+
+    # fit_params = {
+    #     f'{pipeline.steps[-1][0]}__eval_set': [(transformed_X_val, y_val)], 
+    #     # f'{pipeline.steps[-1][0]}__verbose': True,
+    #     f'{pipeline.steps[-1][0]}__early_stopping_rounds': 100
+    # }
+
+    pipeline = pipeline.fit(X_train, y_train, **fit_params)
+    
+
     y_train_pred_prob = pipeline.predict_proba(X_train)[:, 1]
     thresholding_func = threshold_strategy.function()
     optimal_threshold = thresholding_func(y_train, y_train_pred_prob)
@@ -157,7 +176,13 @@ def optimize_pipeline(experiment: Experiment, tracker: RayExperimentTracker):  #
         transform="pandas"
     )  # type: ignore
 
-    pipeline.fit(X_train, y_train)
+    feature_pipeline = deepcopy(pipeline.steps[0][1])
+    feature_pipeline = feature_pipeline.fit(X_train, y_train)
+    transformed_X_val = feature_pipeline.transform(X_val)
+    fit_params = fit_param_mapping[pipeline.steps[-1][1].__class__](transformed_X_val, y_val)
+    fit_params = {f'{pipeline.steps[-1][0]}__{k}': v for k,v in fit_params.items()}
+
+    pipeline = pipeline.fit(X_train, y_train, **fit_params)
     y_train_pred_prob = pipeline.predict_proba(X_train)[:, 1]  # type: ignore
     thresholding_func = experiment.threshold_strategy.function()
     optimal_threshold = thresholding_func(y_train, y_train_pred_prob)
