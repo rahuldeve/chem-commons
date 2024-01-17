@@ -51,14 +51,14 @@ WrappedFunc = Callable[Concatenate[pd.DataFrame, Param], pd.DataFrame]
 
 
 def parallelize(
-    n_jobs: int = 4, chunk_size: int = 4
+    n_jobs: int = 4
 ) -> Callable[[BaseFunc], WrappedFunc]:
     def _inner(f: BaseFunc) -> WrappedFunc:
         @wraps(f)
         def parallel_func(
             df: pd.DataFrame, *args: Param.args, **kwargs: Param.kwargs
         ) -> pd.DataFrame:
-            num_chunks = len(df) // chunk_size
+            num_chunks = len(df) // n_jobs
             tail_size = len(df) % num_chunks
             if tail_size == 0:
                 chunks = np.vsplit(df, num_chunks)
