@@ -22,8 +22,8 @@ class MorganFP(BaseEstimator, TransformerMixin, ClassNamePrefixFeaturesOutMixin)
     def n_features_(self):
         return self.n_features_in_  # type: ignore
 
-    def smiles_to_morgan_fingerprint(self, mol, nBits=4096):
-        morgan_fp = GetMorganFingerprintAsBitVect(mol, radius=2, nBits=int(nBits))
+    def smiles_to_morgan_fingerprint(self, mol):
+        morgan_fp = GetMorganFingerprintAsBitVect(mol, radius=2, nBits=int(self.n_bits))
         fp_array = np.zeros((1,))
         ConvertToNumpyArray(morgan_fp, fp_array)
         return fp_array
@@ -43,7 +43,7 @@ class MorganFP(BaseEstimator, TransformerMixin, ClassNamePrefixFeaturesOutMixin)
 
     def transform(self, X, y=None):
         X = X[self.rdkit_mol_col_name].map(
-            lambda x: self.smiles_to_morgan_fingerprint(x, nBits=self.n_bits)
+            lambda x: self.smiles_to_morgan_fingerprint(x)
         )
         X = np.vstack(X)
         return X
