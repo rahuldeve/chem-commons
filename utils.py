@@ -42,7 +42,7 @@ def standardize(smiles):
 
         # te = rdMolStandardize.TautomerEnumerator() # idem
         # taut_uncharged_parent_clean_mol = te.Canonicalize(uncharged_parent_clean_mol)
-        return uncharged_parent_clean_mol
+        return Chem.MolToInchi(uncharged_parent_clean_mol)
 
 
 Param = ParamSpec("Param")
