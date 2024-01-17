@@ -55,6 +55,9 @@ def calc_scores(y_pred_prob, y_pred, y_true, split_name):
         y_true, y_pred_prob
     )
 
+    tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
+    metrics_dict['specificity'] = tn / (tn + fp)
+    metrics_dict['sensitivity'] = tp / (tp + fn)
     auc, (lb, ub) = delong_confidence_intervals(y_true, y_pred_prob)
     metrics_dict["test_delong_auc"] = auc
     metrics_dict["lb"] = lb
