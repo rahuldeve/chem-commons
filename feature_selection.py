@@ -28,6 +28,7 @@ class CrossValidatedFeatureSelector(MetaEstimatorMixin, SelectorMixin, BaseEstim
 
         self.mean_feature_importance_ = np.vstack(feat_importances).mean(axis=0)
         self.mask_ = ~np.isclose(self.mean_feature_importance_, 0.0)
+        return self
 
     def fit_transform(self, X, y):
         self.fit(X, y)

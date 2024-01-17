@@ -40,6 +40,7 @@ class MorganFP(BaseEstimator, TransformerMixin, ClassNamePrefixFeaturesOutMixin)
         #     # dtype=[np.float64, np.float32, np.str_],
         #     # ensure_2d=True
         # )
+        return self
 
     def transform(self, X, y=None):
         X = X[self.rdkit_mol_col_name].map(
